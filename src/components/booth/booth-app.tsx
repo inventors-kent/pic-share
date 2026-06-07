@@ -688,7 +688,7 @@ function CustomizeScreen() {
         customization.layout === "gif"
           ? await createGifPreview(photos, customization)
           : undefined;
-      setGeneratedDataUrl(result.dataUrl);
+      setGeneratedDataUrl(gifPreview ?? result.dataUrl);
 
       const response = await fetch("/api/sessions", {
         method: "POST",
@@ -1190,6 +1190,9 @@ function ShareScreen() {
 
   if (!shareResult) return null;
 
+  const previewAssetUrl =
+    generatedDataUrl ?? shareResult.gifAssetUrl ?? shareResult.finalAssetUrl;
+
   async function sendEmail() {
     if (!shareResult) return;
     setEmailError(null);
@@ -1227,7 +1230,7 @@ function ShareScreen() {
           shadow="booth"
         >
           <Image
-            src={generatedDataUrl ?? shareResult.finalAssetUrl}
+            src={previewAssetUrl}
             alt="Final booth output"
             rounded="control"
             w="100%"

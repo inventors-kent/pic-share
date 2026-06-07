@@ -47,6 +47,10 @@ export function ShareDownload({
     setStatus(response.ok ? "sent" : "failed");
   }
 
+  const previewAssetUrl = gifAssetUrl ?? finalAssetUrl;
+  const primaryDownloadUrl = gifAssetUrl ?? finalAssetUrl;
+  const primaryDownloadLabel = gifAssetUrl ? "Download GIF" : "Download final";
+
   return (
     <Box bg="booth.bg" minH="100dvh">
       <Container maxW="5xl" px="4" py={{ base: "5", md: "8" }}>
@@ -70,7 +74,7 @@ export function ShareDownload({
             shadow="booth"
           >
             <Image
-              src={finalAssetUrl}
+              src={previewAssetUrl}
               alt="Final PicShare Booth output"
               rounded="control"
               w="100%"
@@ -87,9 +91,9 @@ export function ShareDownload({
               rounded="full"
               size="xl"
             >
-              <Link href={finalAssetUrl} download>
+              <Link href={primaryDownloadUrl} download>
                 <LuDownload />
-                Download final
+                {primaryDownloadLabel}
               </Link>
             </Button>
             {gifAssetUrl && (
@@ -100,9 +104,9 @@ export function ShareDownload({
                 rounded="full"
                 size="xl"
               >
-                <Link href={gifAssetUrl} download>
+                <Link href={finalAssetUrl} download>
                   <LuDownload />
-                  Download GIF
+                  Download still image
                 </Link>
               </Button>
             )}
