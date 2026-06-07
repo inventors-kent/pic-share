@@ -404,7 +404,7 @@ export async function composeFinalImage(
 
   context.fillStyle = "#182026";
   context.textAlign = "center";
-  drawFitText(context, caption, width / 2, height - 54, width - 160, 44, 28);
+  drawFitText(context, caption, width / 2, height - 82, width - 160, 44, 28);
 
   drawStickerPreset(context, customization, width, height, layout);
 

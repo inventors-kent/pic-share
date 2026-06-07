@@ -7,6 +7,8 @@ type WindowWithWebkitAudio = Window & {
 let audioContext: AudioContext | null = null;
 let shutterBuffer: AudioBuffer | null = null;
 let shutterLoadPromise: Promise<AudioBuffer | null> | null = null;
+const activeSources = new Set<AudioBufferSourceNode>();
+const shutterDurationSeconds = 0.38;
 
 function getAudioContext() {
   if (audioContext) return audioContext;
@@ -52,6 +54,17 @@ export async function primeShutterSound() {
   await loadShutterBuffer(context);
 }
 
+export function stopShutterSound() {
+  activeSources.forEach((source) => {
+    try {
+      source.stop();
+    } catch {
+      // The source may have already ended naturally.
+    }
+  });
+  activeSources.clear();
+}
+
 export async function playShutterSound() {
   const context = getAudioContext();
   if (!context) return;
@@ -63,11 +76,19 @@ export async function playShutterSound() {
   const buffer = await loadShutterBuffer(context);
   if (!buffer) return;
 
+  stopShutterSound();
+
   const source = context.createBufferSource();
   const gain = context.createGain();
+  const duration = Math.min(shutterDurationSeconds, buffer.duration);
   source.buffer = buffer;
   gain.gain.setValueAtTime(0.92, context.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + duration);
   source.connect(gain);
   gain.connect(context.destination);
-  source.start();
+  source.addEventListener("ended", () => {
+    activeSources.delete(source);
+  });
+  activeSources.add(source);
+  source.start(context.currentTime, 0, duration);
 }

@@ -51,7 +51,11 @@ import {
   useBoothStore,
 } from "@/lib/booth-store";
 import { composeFinalImage, createGifPreview } from "@/lib/canvas-compose";
-import { playShutterSound, primeShutterSound } from "@/lib/shutter-sound";
+import {
+  playShutterSound,
+  primeShutterSound,
+  stopShutterSound,
+} from "@/lib/shutter-sound";
 
 const Video = chakra("video");
 const photoSlotKeys = Array.from(
@@ -291,6 +295,7 @@ function CameraScreen() {
 
     return () => {
       mounted = false;
+      stopShutterSound();
       streamRef.current?.getTracks().forEach((track) => {
         track.stop();
       });
@@ -342,6 +347,7 @@ function CameraScreen() {
       setFlash(false);
     }
 
+    stopShutterSound();
     setStep("review");
   }
 
