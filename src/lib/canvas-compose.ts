@@ -1,4 +1,4 @@
-import { GIFEncoder, applyPalette, quantize } from "gifenc";
+import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import { type BoothLayout, boothConfig } from "./booth-config";
 import type { BoothCustomization, CapturedPhoto } from "./booth-store";
 
@@ -304,6 +304,8 @@ export async function createGifPreview(
   gif.finish();
 
   const bytes = gif.bytes();
-  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
+  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join(
+    "",
+  );
   return `data:image/gif;base64,${btoa(binary)}`;
 }
