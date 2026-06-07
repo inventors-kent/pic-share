@@ -50,7 +50,7 @@ Details:
 - After capture, show all thumbnails and allow individual retakes.
 - Allow users to return from customization back to review/retake.
 - Do not persist anything until the user generates the final output.
-- After sharing, show `Done` / `Start new session`.
+- After sharing, show `Start new session`.
 - Auto-reset after around 2 minutes of inactivity on the share screen.
 - Start screen doubles as the idle/attract screen.
 

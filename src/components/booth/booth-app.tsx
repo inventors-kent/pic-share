@@ -569,6 +569,7 @@ function CustomizeScreen() {
       <Grid
         gap="6"
         templateColumns={{ base: "1fr", lg: "minmax(0, 1fr) 430px" }}
+        alignItems="start"
       >
         <Box
           bg="booth.surface"
@@ -577,6 +578,7 @@ function CustomizeScreen() {
           borderWidth="1px"
           borderColor="booth.border"
           shadow="booth"
+          alignSelf="start"
         >
           <SimpleGrid
             columns={customization.layout === "horizontal-strip" ? 4 : 2}
@@ -907,7 +909,7 @@ function ShareScreen() {
             color="white"
             onClick={reset}
           >
-            Done. Start new session
+            Start new session
           </Button>
         </Stack>
       </Grid>
