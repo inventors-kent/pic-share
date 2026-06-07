@@ -1,7 +1,6 @@
 export const boothConfig = {
   productName: "PicShare Booth",
-  eventName: "The Good Vibes Social",
-  eventDate: "Tonight",
+  eventName: "KSF Fashion show",
   photoCount: 4,
   countdownSeconds: 3,
   shareLinkExpiryHours: Number(process.env.SHARE_LINK_EXPIRY_HOURS ?? 24),

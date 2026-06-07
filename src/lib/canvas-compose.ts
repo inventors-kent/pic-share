@@ -27,6 +27,15 @@ const gifDelayMs = {
 
 const confettiColors = ["#ff6b5f", "#8ee6c8", "#ffd66b", "#b9a8ff", "#8fd4ff"];
 
+function getFooterHeight(
+  layout: BoothLayout,
+  frame: BoothCustomization["frame"],
+) {
+  if (layout === "vertical-strip") return frame === "instant" ? 270 : 230;
+  if (layout === "horizontal-strip") return frame === "instant" ? 230 : 190;
+  return frame === "instant" ? 190 : 150;
+}
+
 function seededRandom(seed: number) {
   const value = Math.sin(seed * 12.9898) * 43758.5453;
   return value - Math.floor(value);
@@ -161,12 +170,18 @@ function drawImageCover(
   context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
 }
 
-function getSlots(layout: BoothLayout, width: number, height: number) {
+function getSlots(
+  layout: BoothLayout,
+  width: number,
+  height: number,
+  frame: BoothCustomization["frame"],
+) {
   const pad = layout === "grid" ? 92 : 76;
   const gutter = 32;
+  const footerHeight = getFooterHeight(layout, frame);
 
   if (layout === "vertical-strip") {
-    const slotHeight = (height - pad * 2 - gutter * 3 - 160) / 4;
+    const slotHeight = (height - pad * 2 - gutter * 3 - footerHeight) / 4;
     return Array.from({ length: 4 }, (_, index) => ({
       x: pad,
       y: pad + index * (slotHeight + gutter),
@@ -181,7 +196,7 @@ function getSlots(layout: BoothLayout, width: number, height: number) {
       x: pad + index * (slotWidth + gutter),
       y: pad,
       width: slotWidth,
-      height: height - pad * 2 - 128,
+      height: height - pad * 2 - footerHeight,
     }));
   }
 
@@ -194,13 +209,96 @@ function getSlots(layout: BoothLayout, width: number, height: number) {
   }));
 }
 
+function drawFitText(
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  maxFontSize: number,
+  minFontSize: number,
+  weight = 800,
+) {
+  let fontSize = maxFontSize;
+
+  while (fontSize > minFontSize) {
+    context.font = `${weight} ${fontSize}px sans-serif`;
+    if (context.measureText(text).width <= maxWidth) break;
+    fontSize -= 2;
+  }
+
+  context.fillText(text, x, y);
+}
+
+function drawPhotoSlot(
+  context: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  slot: { x: number; y: number; width: number; height: number },
+  frame: BoothCustomization["frame"],
+) {
+  if (frame === "instant") {
+    const filmPad = Math.max(18, Math.round(slot.width * 0.045));
+    const filmBottom = Math.max(58, Math.round(slot.height * 0.16));
+    const photoBox = {
+      x: slot.x + filmPad,
+      y: slot.y + filmPad,
+      width: slot.width - filmPad * 2,
+      height: slot.height - filmPad - filmBottom,
+    };
+
+    context.save();
+    context.shadowColor = "rgba(24, 32, 38, 0.14)";
+    context.shadowBlur = 22;
+    context.shadowOffsetY = 12;
+    context.fillStyle = "#fffaf1";
+    roundedRect(context, slot.x, slot.y, slot.width, slot.height, 30);
+    context.fill();
+    context.restore();
+
+    context.save();
+    roundedRect(
+      context,
+      photoBox.x,
+      photoBox.y,
+      photoBox.width,
+      photoBox.height,
+      22,
+    );
+    context.clip();
+    context.fillStyle = "#ffffff";
+    context.fillRect(photoBox.x, photoBox.y, photoBox.width, photoBox.height);
+    drawImageCover(
+      context,
+      image,
+      photoBox.x,
+      photoBox.y,
+      photoBox.width,
+      photoBox.height,
+    );
+    context.restore();
+    return;
+  }
+
+  context.save();
+  roundedRect(context, slot.x, slot.y, slot.width, slot.height, 34);
+  context.clip();
+  context.fillStyle = "#ffffff";
+  context.fillRect(slot.x, slot.y, slot.width, slot.height);
+  drawImageCover(context, image, slot.x, slot.y, slot.width, slot.height);
+  context.restore();
+}
+
 function drawStickerPreset(
   context: CanvasRenderingContext2D,
   customization: BoothCustomization,
   width: number,
   height: number,
+  layout: BoothLayout,
 ) {
   const accent = accentMap.get(customization.accentColor) ?? "#ff6b5f";
+  const footerHeight = getFooterHeight(layout, customization.frame);
+  const footerTop = height - footerHeight;
+  const footerStickerY = footerTop + (layout === "grid" ? 26 : 30);
   context.save();
   context.fillStyle = accent;
   context.strokeStyle = "#182026";
@@ -225,23 +323,38 @@ function drawStickerPreset(
   }
 
   if (customization.stickerPreset === "good-vibes") {
+    const badgeWidth = layout === "horizontal-strip" ? 300 : 330;
+    const badgeX = width - badgeWidth - 78;
+    const badgeY = layout === "grid" ? height - 138 : footerStickerY;
     context.beginPath();
-    context.roundRect(width - 410, height - 150, 330, 82, 42);
+    context.roundRect(badgeX, badgeY, badgeWidth, 82, 42);
     context.fill();
     context.stroke();
     context.fillStyle = "#182026";
     context.font = "700 40px sans-serif";
-    context.fillText("good vibes", width - 362, height - 96);
+    context.textAlign = "center";
+    context.fillText("good vibes", badgeX + badgeWidth / 2, badgeY + 55);
   }
 
   if (customization.stickerPreset === "event-badge") {
+    const badgeWidth = layout === "horizontal-strip" ? 390 : 430;
+    const badgeY = layout === "grid" ? height - 140 : footerStickerY;
     context.beginPath();
-    context.roundRect(54, height - 152, 430, 86, 42);
+    context.roundRect(54, badgeY, badgeWidth, 86, 42);
     context.fill();
     context.stroke();
     context.fillStyle = "#182026";
-    context.font = "700 34px sans-serif";
-    context.fillText(boothConfig.eventName, 96, height - 98);
+    context.textAlign = "center";
+    drawFitText(
+      context,
+      boothConfig.eventName,
+      54 + badgeWidth / 2,
+      badgeY + 56,
+      badgeWidth - 56,
+      34,
+      22,
+      700,
+    );
   }
 
   context.restore();
@@ -264,7 +377,12 @@ export async function composeFinalImage(
   canvas.height = height;
 
   const accent = accentMap.get(customization.accentColor) ?? "#ff6b5f";
-  context.fillStyle = customization.frame === "clean" ? "#ffffff" : accent;
+  context.fillStyle =
+    customization.frame === "clean"
+      ? "#ffffff"
+      : customization.frame === "instant"
+        ? "#f8efe4"
+        : accent;
   context.fillRect(0, 0, width, height);
 
   if (customization.frame === "confetti") {
@@ -274,30 +392,21 @@ export async function composeFinalImage(
   const images = await Promise.all(
     photos.map((photo) => loadImage(photo.dataUrl)),
   );
-  const slots = getSlots(layout, width, height);
+  const slots = getSlots(layout, width, height, customization.frame);
 
   images.forEach((image, index) => {
     const slot = slots[index];
     if (!slot) return;
-    context.save();
-    roundedRect(context, slot.x, slot.y, slot.width, slot.height, 34);
-    context.clip();
-    context.fillStyle = "#ffffff";
-    context.fillRect(slot.x, slot.y, slot.width, slot.height);
-    drawImageCover(context, image, slot.x, slot.y, slot.width, slot.height);
-    context.restore();
+    drawPhotoSlot(context, image, slot, customization.frame);
   });
 
-  const caption =
-    customization.caption.trim() ||
-    `${boothConfig.eventName} · ${boothConfig.eventDate}`;
+  const caption = customization.caption.trim() || boothConfig.eventName;
 
   context.fillStyle = "#182026";
-  context.font = "700 44px sans-serif";
   context.textAlign = "center";
-  context.fillText(caption, width / 2, height - 54, width - 120);
+  drawFitText(context, caption, width / 2, height - 54, width - 160, 44, 28);
 
-  drawStickerPreset(context, customization, width, height);
+  drawStickerPreset(context, customization, width, height, layout);
 
   return {
     dataUrl: canvas.toDataURL("image/jpeg", 0.92),
@@ -332,7 +441,12 @@ export async function createGifPreview(
 
   images.forEach((image) => {
     context.clearRect(0, 0, width, height);
-    context.fillStyle = customization.frame === "clean" ? "#ffffff" : accent;
+    context.fillStyle =
+      customization.frame === "clean"
+        ? "#ffffff"
+        : customization.frame === "instant"
+          ? "#f8efe4"
+          : accent;
     context.fillRect(0, 0, width, height);
 
     if (customization.frame === "confetti") {
@@ -378,7 +492,7 @@ export async function createGifPreview(
       width - 72,
     );
 
-    drawStickerPreset(context, customization, width, height);
+    drawStickerPreset(context, customization, width, height, "grid");
 
     const { data } = context.getImageData(0, 0, width, height);
     const palette = quantize(data, 256);
