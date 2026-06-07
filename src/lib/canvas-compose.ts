@@ -25,6 +25,104 @@ const gifDelayMs = {
   fast: 280,
 };
 
+const confettiColors = ["#ff6b5f", "#8ee6c8", "#ffd66b", "#b9a8ff", "#8fd4ff"];
+
+function seededRandom(seed: number) {
+  const value = Math.sin(seed * 12.9898) * 43758.5453;
+  return value - Math.floor(value);
+}
+
+function drawConfettiPattern(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  scale = 1,
+) {
+  context.save();
+
+  for (let index = 0; index < 112; index += 1) {
+    const edge = index % 4;
+    const along = seededRandom(index + 3);
+    const inset = 26 * scale + seededRandom(index + 9) * 86 * scale;
+    const x =
+      edge === 0
+        ? along * width
+        : edge === 1
+          ? width - inset
+          : edge === 2
+            ? along * width
+            : inset;
+    const y =
+      edge === 0
+        ? inset
+        : edge === 1
+          ? along * height
+          : edge === 2
+            ? height - inset
+            : along * height;
+    const rotation = seededRandom(index + 21) * Math.PI;
+    const pieceWidth = (10 + seededRandom(index + 31) * 24) * scale;
+    const pieceHeight = (5 + seededRandom(index + 41) * 12) * scale;
+
+    context.save();
+    context.translate(x, y);
+    context.rotate(rotation);
+    context.fillStyle = confettiColors[index % confettiColors.length];
+
+    if (index % 5 === 0) {
+      context.beginPath();
+      context.moveTo(0, -pieceHeight);
+      context.lineTo(pieceWidth, pieceHeight);
+      context.lineTo(-pieceWidth, pieceHeight);
+      context.closePath();
+      context.fill();
+    } else if (index % 3 === 0) {
+      context.beginPath();
+      context.arc(0, 0, pieceHeight, 0, Math.PI * 2);
+      context.fill();
+    } else {
+      context.beginPath();
+      context.roundRect(
+        -pieceWidth / 2,
+        -pieceHeight / 2,
+        pieceWidth,
+        pieceHeight,
+        3 * scale,
+      );
+      context.fill();
+    }
+
+    context.restore();
+  }
+
+  for (let index = 0; index < 12; index += 1) {
+    const x = seededRandom(index + 101) * width;
+    const y =
+      index % 2 === 0
+        ? 34 * scale + seededRandom(index + 111) * 90 * scale
+        : height - 124 * scale + seededRandom(index + 111) * 90 * scale;
+
+    context.strokeStyle = confettiColors[(index + 2) % confettiColors.length];
+    context.lineWidth = 7 * scale;
+    context.lineCap = "round";
+    context.beginPath();
+
+    for (let step = 0; step < 7; step += 1) {
+      const waveX = x + step * 24 * scale;
+      const waveY = y + Math.sin(step * 1.4 + index) * 18 * scale;
+      if (step === 0) {
+        context.moveTo(waveX, waveY);
+      } else {
+        context.lineTo(waveX, waveY);
+      }
+    }
+
+    context.stroke();
+  }
+
+  context.restore();
+}
+
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
@@ -170,20 +268,7 @@ export async function composeFinalImage(
   context.fillRect(0, 0, width, height);
 
   if (customization.frame === "confetti") {
-    for (let index = 0; index < 80; index += 1) {
-      context.fillStyle = ["#ffd66b", "#8ee6c8", "#b9a8ff", "#ff6b5f"][
-        index % 4
-      ];
-      context.beginPath();
-      context.arc(
-        Math.random() * width,
-        Math.random() * height,
-        6 + Math.random() * 12,
-        0,
-        Math.PI * 2,
-      );
-      context.fill();
-    }
+    drawConfettiPattern(context, width, height);
   }
 
   const images = await Promise.all(
@@ -249,6 +334,10 @@ export async function createGifPreview(
     context.clearRect(0, 0, width, height);
     context.fillStyle = customization.frame === "clean" ? "#ffffff" : accent;
     context.fillRect(0, 0, width, height);
+
+    if (customization.frame === "confetti") {
+      drawConfettiPattern(context, width, height, 0.55);
+    }
 
     const pad = customization.frame === "instant" ? 66 : 46;
     const bottomPad = customization.frame === "instant" ? 112 : 74;

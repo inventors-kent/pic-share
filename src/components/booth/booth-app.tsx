@@ -29,6 +29,7 @@ import {
   LuCheck,
   LuDownload,
   LuMail,
+  LuPartyPopper,
   LuQrCode,
   LuRefreshCcw,
   LuSparkles,
@@ -50,13 +51,14 @@ import {
   useBoothStore,
 } from "@/lib/booth-store";
 import { composeFinalImage, createGifPreview } from "@/lib/canvas-compose";
-import { playShutterSound } from "@/lib/shutter-sound";
+import { playShutterSound, primeShutterSound } from "@/lib/shutter-sound";
 
 const Video = chakra("video");
 const photoSlotKeys = Array.from(
   { length: boothConfig.photoCount },
   (_, index) => `photo-slot-${index + 1}`,
 );
+const posePrompts = ["Look up", "Go bold", "Switch sides", "Big finish"];
 
 export function BoothApp() {
   const [mounted, setMounted] = useState(false);
@@ -249,6 +251,14 @@ function CameraScreen() {
   const replacePhoto = useBoothStore((state) => state.replacePhoto);
   const setStep = useBoothStore((state) => state.setStep);
   const setError = useBoothStore((state) => state.setError);
+  const capturedCount = photos.length;
+  const remainingShots =
+    retakeIndex === null ? boothConfig.photoCount - capturedCount : 1;
+  const currentShotNumber =
+    retakeIndex === null
+      ? Math.min(capturedCount + 1, boothConfig.photoCount)
+      : retakeIndex + 1;
+  const posePrompt = posePrompts[(currentShotNumber - 1) % posePrompts.length];
 
   useEffect(() => {
     let mounted = true;
@@ -305,6 +315,7 @@ function CameraScreen() {
 
   async function runBurst() {
     setStatus("counting");
+    void primeShutterSound();
 
     for (
       let shotIndex = 0;
@@ -338,7 +349,7 @@ function CameraScreen() {
     <PageShell>
       <Grid
         gap="6"
-        templateColumns={{ base: "1fr", lg: "1fr 360px" }}
+        templateColumns={{ base: "1fr", lg: "minmax(0, 1fr) 430px" }}
         alignItems="stretch"
       >
         <Box
@@ -385,28 +396,118 @@ function CameraScreen() {
           borderWidth="1px"
           borderColor="booth.border"
           p="6"
-          gap="6"
+          gap="7"
           justify="space-between"
         >
-          <Stack gap="3">
-            <Text color="booth.muted" fontWeight="700">
-              {retakeIndex === null
-                ? "Capture burst"
-                : `Retake photo ${retakeIndex + 1}`}
-            </Text>
-            <Heading size="3xl" lineHeight="1">
-              Give it a little drama.
-            </Heading>
+          <Stack gap="5">
+            <HStack justify="space-between" align="start" gap="4">
+              <Stack gap="3">
+                <Badge
+                  bg="booth.secondary"
+                  color="booth.fg"
+                  rounded="full"
+                  px="3"
+                  py="1"
+                  alignSelf="flex-start"
+                >
+                  {retakeIndex === null
+                    ? "Capture burst"
+                    : `Retake photo ${retakeIndex + 1}`}
+                </Badge>
+                <Heading size="3xl" lineHeight="1">
+                  Give it a little drama.
+                </Heading>
+              </Stack>
+              <Circle bg="booth.surfaceTint" color="booth.primary" size="12">
+                <Icon as={LuPartyPopper} boxSize="6" />
+              </Circle>
+            </HStack>
+
+            <Box
+              bg="booth.surfaceTint"
+              rounded="control"
+              borderWidth="1px"
+              borderColor="booth.border"
+              p="5"
+            >
+              <HStack justify="space-between" align="center">
+                <Stack gap="1">
+                  <Text color="booth.muted" fontSize="sm" fontWeight="800">
+                    Current shot
+                  </Text>
+                  <Text fontSize="4xl" fontWeight="950" lineHeight="1">
+                    {currentShotNumber}
+                    <Text as="span" color="booth.muted" fontSize="xl">
+                      /{boothConfig.photoCount}
+                    </Text>
+                  </Text>
+                </Stack>
+                <Stack gap="1" textAlign="right">
+                  <Text color="booth.muted" fontSize="sm" fontWeight="800">
+                    Pose cue
+                  </Text>
+                  <Text fontSize="2xl" fontWeight="900">
+                    {status === "counting" ? countdown : posePrompt}
+                  </Text>
+                </Stack>
+              </HStack>
+            </Box>
           </Stack>
 
-          <SimpleGrid columns={4} gap="2">
-            {photoSlotKeys.map((slotKey, index) => (
-              <Box
-                key={slotKey}
-                h="3"
+          <Stack gap="4">
+            <HStack justify="space-between">
+              <Text fontWeight="900">Burst progress</Text>
+              <Text color="booth.muted" fontSize="sm" fontWeight="800">
+                {remainingShots} to go
+              </Text>
+            </HStack>
+            <SimpleGrid columns={4} gap="3">
+              {photoSlotKeys.map((slotKey, index) => {
+                const isCaptured = index < capturedCount;
+                const isCurrent = index === currentShotNumber - 1;
+
+                return (
+                  <Stack key={slotKey} gap="2" align="center">
+                    <Box
+                      h="3"
+                      w="100%"
+                      rounded="full"
+                      bg={isCaptured ? "booth.primary" : "booth.border"}
+                      outline={isCurrent ? "3px solid" : "none"}
+                      outlineColor="booth.lemon"
+                    />
+                    <Text
+                      color={
+                        isCaptured || isCurrent ? "booth.fg" : "booth.muted"
+                      }
+                      fontSize="xs"
+                      fontWeight="900"
+                    >
+                      {index + 1}
+                    </Text>
+                  </Stack>
+                );
+              })}
+            </SimpleGrid>
+          </Stack>
+
+          <SimpleGrid columns={2} gap="3">
+            {["Countdown", "Flash", "Shutter", "Review"].map((label) => (
+              <HStack
+                key={label}
+                bg="white"
                 rounded="full"
-                bg={index < photos.length ? "booth.primary" : "booth.border"}
-              />
+                borderWidth="1px"
+                borderColor="booth.border"
+                px="3"
+                py="2"
+                gap="2"
+              >
+                <Circle size="2" bg="booth.primary" />
+                <Text fontSize="sm" fontWeight="800">
+                  {label}
+                </Text>
+              </HStack>
             ))}
           </SimpleGrid>
 
@@ -894,6 +995,7 @@ function AnimatedGifPreview({
           objectFit="cover"
           w="100%"
         />
+        {customization.frame === "confetti" && <ConfettiOverlay />}
         <StickerOverlay
           preset={customization.stickerPreset}
           eventName={boothConfig.eventName}
@@ -909,6 +1011,55 @@ function AnimatedGifPreview({
         </Badge>
       </HStack>
     </Stack>
+  );
+}
+
+function ConfettiOverlay() {
+  const pieces = Array.from({ length: 34 }, (_, index) => {
+    const edge = index % 4;
+    const color = [
+      "booth.primary",
+      "booth.secondary",
+      "booth.lemon",
+      "booth.lilac",
+      "booth.sky",
+    ][index % 5];
+    const offset = `${8 + ((index * 17) % 76)}%`;
+    const inset = `${2 + ((index * 11) % 16)}%`;
+    const size = `${8 + (index % 5) * 3}px`;
+
+    return {
+      id: `confetti-${index}`,
+      color,
+      height: index % 3 === 0 ? size : "7px",
+      left: edge === 0 || edge === 2 ? offset : edge === 3 ? inset : "auto",
+      right: edge === 1 ? inset : "auto",
+      top: edge === 0 ? inset : edge === 1 || edge === 3 ? offset : "auto",
+      bottom: edge === 2 ? inset : "auto",
+      transform: `rotate(${(index * 29) % 160}deg)`,
+      width: index % 4 === 0 ? size : `${14 + (index % 6) * 4}px`,
+    };
+  });
+
+  return (
+    <Box position="absolute" inset="0" pointerEvents="none">
+      {pieces.map((piece) => (
+        <Box
+          key={piece.id}
+          position="absolute"
+          bg={piece.color}
+          top={piece.top}
+          right={piece.right}
+          bottom={piece.bottom}
+          left={piece.left}
+          w={piece.width}
+          h={piece.height}
+          rounded={piece.width === piece.height ? "full" : "2px"}
+          transform={piece.transform}
+          shadow="0 1px 2px rgba(24, 32, 38, 0.18)"
+        />
+      ))}
+    </Box>
   );
 }
 
