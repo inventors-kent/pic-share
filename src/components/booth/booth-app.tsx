@@ -516,6 +516,10 @@ function OptionButton<T extends string>({
 function CustomizeScreen() {
   const photos = useBoothStore((state) => state.photos);
   const customization = useBoothStore((state) => state.customization);
+  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
+  const [previewStatus, setPreviewStatus] = useState<"loading" | "ready">(
+    "loading",
+  );
   const updateCustomization = useBoothStore(
     (state) => state.updateCustomization,
   );
@@ -525,6 +529,29 @@ function CustomizeScreen() {
   const setShareResult = useBoothStore((state) => state.setShareResult);
   const setStep = useBoothStore((state) => state.setStep);
   const setError = useBoothStore((state) => state.setError);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPreviewStatus("loading");
+
+    composeFinalImage(photos, customization)
+      .then((result) => {
+        if (!cancelled) {
+          setPreviewDataUrl(result.dataUrl);
+          setPreviewStatus("ready");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPreviewDataUrl(null);
+          setPreviewStatus("ready");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [photos, customization]);
 
   async function generate() {
     try {
@@ -585,23 +612,73 @@ function CustomizeScreen() {
           shadow="booth"
           alignSelf="start"
         >
-          <SimpleGrid
-            columns={customization.layout === "horizontal-strip" ? 4 : 2}
-            gap="3"
-          >
-            {photos.map((photo, index) => (
-              <Image
-                key={photo.id}
-                src={photo.dataUrl}
-                alt={`Preview photo ${index + 1}`}
-                rounded="control"
-                aspectRatio={
-                  customization.layout === "horizontal-strip" ? "3 / 4" : "1"
+          <Stack gap="4">
+            <HStack justify="space-between" gap="3" flexWrap="wrap">
+              <Stack gap="0">
+                <Text fontWeight="900">Live preview</Text>
+                <Text color="booth.muted" fontSize="sm">
+                  Updates as you choose styles.
+                </Text>
+              </Stack>
+              <Badge
+                bg={
+                  previewStatus === "loading"
+                    ? "booth.lemon"
+                    : "booth.secondary"
                 }
-                objectFit="cover"
-              />
-            ))}
-          </SimpleGrid>
+                color="booth.fg"
+                rounded="full"
+                px="3"
+                py="1"
+              >
+                {previewStatus === "loading" ? "Updating" : "Ready"}
+              </Badge>
+            </HStack>
+
+            <Flex
+              bg="booth.surfaceTint"
+              rounded="control"
+              borderWidth="1px"
+              borderColor="booth.border"
+              minH={{ base: "320px", md: "520px" }}
+              align="center"
+              justify="center"
+              p={{ base: "3", md: "5" }}
+            >
+              {previewDataUrl ? (
+                <Image
+                  src={previewDataUrl}
+                  alt="Live styled booth preview"
+                  rounded="control"
+                  maxH={{ base: "520px", lg: "calc(100dvh - 180px)" }}
+                  maxW="100%"
+                  objectFit="contain"
+                  shadow="booth"
+                />
+              ) : (
+                <SimpleGrid
+                  columns={customization.layout === "horizontal-strip" ? 4 : 2}
+                  gap="3"
+                  w="100%"
+                >
+                  {photos.map((photo, index) => (
+                    <Image
+                      key={photo.id}
+                      src={photo.dataUrl}
+                      alt={`Preview photo ${index + 1}`}
+                      rounded="control"
+                      aspectRatio={
+                        customization.layout === "horizontal-strip"
+                          ? "3 / 4"
+                          : "1"
+                      }
+                      objectFit="cover"
+                    />
+                  ))}
+                </SimpleGrid>
+              )}
+            </Flex>
+          </Stack>
         </Box>
 
         <Stack
