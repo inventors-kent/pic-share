@@ -24,7 +24,7 @@ async function loadShutterBuffer(context: AudioContext) {
   if (shutterBuffer) return shutterBuffer;
   if (shutterLoadPromise) return shutterLoadPromise;
 
-  shutterLoadPromise = fetch("/sounds/camera-shutter.wav")
+  shutterLoadPromise = fetch("/sounds/camera-shutter.mp3")
     .then((response) => {
       if (!response.ok) {
         throw new Error("Camera shutter sound could not be loaded.");
