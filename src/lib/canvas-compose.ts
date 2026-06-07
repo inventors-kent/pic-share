@@ -1,3 +1,4 @@
+import { GIFEncoder, applyPalette, quantize } from "gifenc";
 import { type BoothLayout, boothConfig } from "./booth-config";
 import type { BoothCustomization, CapturedPhoto } from "./booth-store";
 
@@ -16,6 +17,12 @@ const layoutSize: Record<BoothLayout, { width: number; height: number }> = {
   "vertical-strip": { width: 900, height: 1800 },
   "horizontal-strip": { width: 1800, height: 900 },
   gif: { width: 1200, height: 1200 },
+};
+
+const gifDelayMs = {
+  slow: 850,
+  normal: 520,
+  fast: 280,
 };
 
 function loadImage(src: string) {
@@ -216,6 +223,87 @@ export async function composeFinalImage(
 
 export async function createGifPreview(
   photos: CapturedPhoto[],
+  customization: BoothCustomization,
 ): Promise<string | undefined> {
-  return photos[0]?.dataUrl;
+  if (photos.length === 0) return undefined;
+
+  const width = 640;
+  const height = 640;
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+
+  if (!context) {
+    throw new Error("Canvas is unavailable on this device.");
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const accent = accentMap.get(customization.accentColor) ?? "#ff6b5f";
+  const gif = GIFEncoder();
+  const images = await Promise.all(
+    photos.map((photo) => loadImage(photo.dataUrl)),
+  );
+
+  images.forEach((image) => {
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = customization.frame === "clean" ? "#ffffff" : accent;
+    context.fillRect(0, 0, width, height);
+
+    const pad = customization.frame === "instant" ? 66 : 46;
+    const bottomPad = customization.frame === "instant" ? 112 : 74;
+    const photoBox = {
+      x: pad,
+      y: pad,
+      width: width - pad * 2,
+      height: height - pad - bottomPad,
+    };
+
+    context.save();
+    roundedRect(
+      context,
+      photoBox.x,
+      photoBox.y,
+      photoBox.width,
+      photoBox.height,
+      34,
+    );
+    context.clip();
+    drawImageCover(
+      context,
+      image,
+      photoBox.x,
+      photoBox.y,
+      photoBox.width,
+      photoBox.height,
+    );
+    context.restore();
+
+    context.fillStyle = "#182026";
+    context.font = "700 28px sans-serif";
+    context.textAlign = "center";
+    context.fillText(
+      customization.caption.trim() || boothConfig.eventName,
+      width / 2,
+      height - 34,
+      width - 72,
+    );
+
+    drawStickerPreset(context, customization, width, height);
+
+    const { data } = context.getImageData(0, 0, width, height);
+    const palette = quantize(data, 256);
+    const index = applyPalette(data, palette);
+    gif.writeFrame(index, width, height, {
+      palette,
+      delay: gifDelayMs[customization.gifSpeed],
+      repeat: 0,
+    });
+  });
+
+  gif.finish();
+
+  const bytes = gif.bytes();
+  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
+  return `data:image/gif;base64,${btoa(binary)}`;
 }

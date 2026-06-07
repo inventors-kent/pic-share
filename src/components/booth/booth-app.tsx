@@ -44,7 +44,11 @@ import {
   layoutOptions,
   type StickerPresetId,
 } from "@/lib/booth-config";
-import { type CapturedPhoto, useBoothStore } from "@/lib/booth-store";
+import {
+  type BoothCustomization,
+  type CapturedPhoto,
+  useBoothStore,
+} from "@/lib/booth-store";
 import { composeFinalImage, createGifPreview } from "@/lib/canvas-compose";
 
 const Video = chakra("video");
@@ -517,6 +521,7 @@ function CustomizeScreen() {
   const photos = useBoothStore((state) => state.photos);
   const customization = useBoothStore((state) => state.customization);
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
+  const [gifFrameIndex, setGifFrameIndex] = useState(0);
   const [previewStatus, setPreviewStatus] = useState<"loading" | "ready">(
     "loading",
   );
@@ -553,13 +558,32 @@ function CustomizeScreen() {
     };
   }, [photos, customization]);
 
+  useEffect(() => {
+    if (customization.layout !== "gif" || photos.length <= 1) {
+      setGifFrameIndex(0);
+      return;
+    }
+
+    const delay = {
+      slow: 850,
+      normal: 520,
+      fast: 280,
+    }[customization.gifSpeed];
+
+    const interval = window.setInterval(() => {
+      setGifFrameIndex((index) => (index + 1) % photos.length);
+    }, delay);
+
+    return () => window.clearInterval(interval);
+  }, [customization.gifSpeed, customization.layout, photos.length]);
+
   async function generate() {
     try {
       setStep("generating");
       const result = await composeFinalImage(photos, customization);
       const gifPreview =
         customization.layout === "gif"
-          ? await createGifPreview(photos)
+          ? await createGifPreview(photos, customization)
           : undefined;
       setGeneratedDataUrl(result.dataUrl);
 
@@ -646,15 +670,23 @@ function CustomizeScreen() {
               p={{ base: "3", md: "5" }}
             >
               {previewDataUrl ? (
-                <Image
-                  src={previewDataUrl}
-                  alt="Live styled booth preview"
-                  rounded="control"
-                  maxH={{ base: "520px", lg: "calc(100dvh - 180px)" }}
-                  maxW="100%"
-                  objectFit="contain"
-                  shadow="booth"
-                />
+                customization.layout === "gif" ? (
+                  <AnimatedGifPreview
+                    photo={photos[gifFrameIndex] ?? photos[0]}
+                    customization={customization}
+                    frameLabel={`${gifFrameIndex + 1} / ${photos.length}`}
+                  />
+                ) : (
+                  <Image
+                    src={previewDataUrl}
+                    alt="Live styled booth preview"
+                    rounded="control"
+                    maxH={{ base: "520px", lg: "calc(100dvh - 180px)" }}
+                    maxW="100%"
+                    objectFit="contain"
+                    shadow="booth"
+                  />
+                )
               ) : (
                 <SimpleGrid
                   columns={customization.layout === "horizontal-strip" ? 4 : 2}
@@ -824,6 +856,136 @@ function CustomizeScreen() {
         </Stack>
       </Grid>
     </PageShell>
+  );
+}
+
+function AnimatedGifPreview({
+  photo,
+  customization,
+  frameLabel,
+}: {
+  photo: CapturedPhoto;
+  customization: BoothCustomization;
+  frameLabel: string;
+}) {
+  const accent =
+    boothConfig.accentColors.find(
+      (color) => color.id === customization.accentColor,
+    )?.value ?? "#ff6b5f";
+
+  return (
+    <Stack
+      bg={customization.frame === "clean" ? "white" : accent}
+      rounded="booth"
+      p={{ base: "4", md: "6" }}
+      gap="4"
+      w="min(100%, 560px)"
+      shadow="booth"
+      position="relative"
+    >
+      <Box position="relative" overflow="hidden" rounded="control">
+        <Image
+          key={photo.id}
+          src={photo.dataUrl}
+          alt="Animated GIF frame preview"
+          aspectRatio="1"
+          objectFit="cover"
+          w="100%"
+        />
+        <StickerOverlay
+          preset={customization.stickerPreset}
+          eventName={boothConfig.eventName}
+        />
+      </Box>
+
+      <HStack justify="space-between" gap="3">
+        <Text fontWeight="900" color="booth.fg" lineClamp={1}>
+          {customization.caption.trim() || boothConfig.eventName}
+        </Text>
+        <Badge bg="white" color="booth.fg" rounded="full" px="3" py="1">
+          GIF {frameLabel}
+        </Badge>
+      </HStack>
+    </Stack>
+  );
+}
+
+function StickerOverlay({
+  preset,
+  eventName,
+}: {
+  preset: StickerPresetId;
+  eventName: string;
+}) {
+  if (preset === "good-vibes") {
+    return (
+      <Badge
+        position="absolute"
+        right="4"
+        bottom="4"
+        bg="booth.lemon"
+        color="booth.fg"
+        rounded="full"
+        px="3"
+        py="1"
+        fontWeight="900"
+      >
+        good vibes
+      </Badge>
+    );
+  }
+
+  if (preset === "event-badge") {
+    return (
+      <Badge
+        position="absolute"
+        left="4"
+        bottom="4"
+        bg="booth.secondary"
+        color="booth.fg"
+        rounded="full"
+        px="3"
+        py="1"
+        fontWeight="900"
+      >
+        {eventName}
+      </Badge>
+    );
+  }
+
+  const symbol = {
+    hearts: "♥",
+    sparkles: "✦",
+    stars: "★",
+  }[preset];
+
+  if (!symbol) return null;
+
+  return (
+    <>
+      <Text
+        position="absolute"
+        top="3"
+        left="4"
+        color="booth.primary"
+        fontSize="5xl"
+        fontWeight="900"
+        lineHeight="1"
+      >
+        {symbol}
+      </Text>
+      <Text
+        position="absolute"
+        right="4"
+        bottom="3"
+        color="booth.lemon"
+        fontSize="4xl"
+        fontWeight="900"
+        lineHeight="1"
+      >
+        {symbol}
+      </Text>
+    </>
   );
 }
 
