@@ -549,7 +549,12 @@ function CustomizeScreen() {
       });
 
       if (!response.ok) {
-        throw new Error("The share link could not be created.");
+        const errorBody = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(
+          errorBody?.error || "The share link could not be created.",
+        );
       }
 
       const share = await response.json();

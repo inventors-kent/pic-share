@@ -35,7 +35,7 @@ function asJson(value: unknown) {
 
 function getSql() {
   if (!hasDatabaseEnv || !env.DATABASE_URL) return null;
-  return postgres(env.DATABASE_URL, { max: 1 });
+  return postgres(env.DATABASE_URL, { max: 1, prepare: false });
 }
 
 function toRecord(row: Record<string, unknown>): PhotoSessionRecord {
