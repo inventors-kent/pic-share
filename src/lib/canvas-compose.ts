@@ -360,6 +360,77 @@ function drawStickerPreset(
   context.restore();
 }
 
+function drawGifStickerPreset(
+  context: CanvasRenderingContext2D,
+  customization: BoothCustomization,
+  photoBox: { x: number; y: number; width: number; height: number },
+) {
+  const accent = accentMap.get(customization.accentColor) ?? "#ff6b5f";
+
+  context.save();
+  context.fillStyle = accent;
+  context.strokeStyle = "#182026";
+  context.lineWidth = 5;
+
+  if (customization.stickerPreset === "hearts") {
+    context.font = "56px sans-serif";
+    context.fillText("♥", photoBox.x + 24, photoBox.y + 58);
+    context.fillText(
+      "♥",
+      photoBox.x + photoBox.width - 74,
+      photoBox.y + photoBox.height - 22,
+    );
+  }
+
+  if (customization.stickerPreset === "stars") {
+    context.font = "58px sans-serif";
+    context.fillText("★", photoBox.x + 22, photoBox.y + 60);
+    context.fillText("★", photoBox.x + photoBox.width - 76, photoBox.y + 60);
+  }
+
+  if (customization.stickerPreset === "sparkles") {
+    context.font = "58px sans-serif";
+    context.fillText("✦", photoBox.x + 22, photoBox.y + 60);
+    context.fillText(
+      "✧",
+      photoBox.x + photoBox.width - 78,
+      photoBox.y + photoBox.height - 24,
+    );
+  }
+
+  if (
+    customization.stickerPreset === "good-vibes" ||
+    customization.stickerPreset === "event-badge"
+  ) {
+    const label =
+      customization.stickerPreset === "good-vibes"
+        ? "good vibes"
+        : boothConfig.eventName;
+    const badgeWidth = 172;
+    const badgeHeight = 34;
+    const badgeX = photoBox.x + 22;
+    const badgeY = photoBox.y + photoBox.height - badgeHeight - 20;
+
+    context.beginPath();
+    context.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 18);
+    context.fill();
+    context.fillStyle = "#182026";
+    context.textAlign = "center";
+    drawFitText(
+      context,
+      label,
+      badgeX + badgeWidth / 2,
+      badgeY + 23,
+      badgeWidth - 22,
+      18,
+      13,
+      800,
+    );
+  }
+
+  context.restore();
+}
+
 export async function composeFinalImage(
   photos: CapturedPhoto[],
   customization: BoothCustomization,
@@ -439,14 +510,9 @@ export async function createGifPreview(
     photos.map((photo) => loadImage(photo.dataUrl)),
   );
 
-  images.forEach((image) => {
+  images.forEach((image, frameIndex) => {
     context.clearRect(0, 0, width, height);
-    context.fillStyle =
-      customization.frame === "clean"
-        ? "#ffffff"
-        : customization.frame === "instant"
-          ? "#f8efe4"
-          : accent;
+    context.fillStyle = customization.frame === "clean" ? "#ffffff" : accent;
     context.fillRect(0, 0, width, height);
 
     if (customization.frame === "confetti") {
@@ -482,17 +548,40 @@ export async function createGifPreview(
     );
     context.restore();
 
+    drawGifStickerPreset(context, customization, photoBox);
+
     context.fillStyle = "#182026";
-    context.font = "700 28px sans-serif";
-    context.textAlign = "center";
-    context.fillText(
+    context.textAlign = "left";
+    drawFitText(
+      context,
       customization.caption.trim() || boothConfig.eventName,
-      width / 2,
+      pad,
       height - 34,
-      width - 72,
+      width - pad * 2 - 124,
+      28,
+      18,
     );
 
-    drawStickerPreset(context, customization, width, height, "grid");
+    const badgeWidth = 98;
+    const badgeHeight = 36;
+    context.fillStyle = "#ffffff";
+    context.beginPath();
+    context.roundRect(
+      width - pad - badgeWidth,
+      height - 58,
+      badgeWidth,
+      badgeHeight,
+      18,
+    );
+    context.fill();
+    context.fillStyle = "#182026";
+    context.textAlign = "center";
+    context.font = "800 18px sans-serif";
+    context.fillText(
+      `GIF ${frameIndex + 1} / ${images.length}`,
+      width - pad - badgeWidth / 2,
+      height - 34,
+    );
 
     const { data } = context.getImageData(0, 0, width, height);
     const palette = quantize(data, 256);

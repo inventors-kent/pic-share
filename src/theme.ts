@@ -41,6 +41,25 @@ const config = defineConfig({
         "booth.border": { value: "rgba(24, 32, 38, 0.12)" },
       },
     },
+    keyframes: {
+      "booth-drift": {
+        "0%, 100%": { transform: "translateY(0) rotate(-2deg)" },
+        "50%": { transform: "translateY(-12px) rotate(2deg)" },
+      },
+      "booth-fill": {
+        "0%": { width: "14%" },
+        "45%": { width: "64%" },
+        "100%": { width: "100%" },
+      },
+      "booth-scan": {
+        "0%": { transform: "translateX(-120%)" },
+        "100%": { transform: "translateX(120%)" },
+      },
+      "booth-tick": {
+        "0%, 100%": { opacity: "0.55", transform: "scale(0.96)" },
+        "50%": { opacity: "1", transform: "scale(1.04)" },
+      },
+    },
   },
   globalCss: {
     html: {

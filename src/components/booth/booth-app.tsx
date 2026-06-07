@@ -16,7 +16,6 @@ import {
   IconButton,
   Image,
   Input,
-  Link,
   SimpleGrid,
   Stack,
   Text,
@@ -27,7 +26,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   LuCamera,
   LuCheck,
-  LuDownload,
   LuMail,
   LuPartyPopper,
   LuQrCode,
@@ -497,20 +495,21 @@ function CameraScreen() {
             </SimpleGrid>
           </Stack>
 
-          <SimpleGrid columns={2} gap="3">
+          <SimpleGrid columns={2} gap="2">
             {["Countdown", "Flash", "Shutter", "Review"].map((label) => (
               <HStack
                 key={label}
-                bg="white"
+                bg="booth.surfaceTint"
                 rounded="full"
                 borderWidth="1px"
-                borderColor="booth.border"
-                px="3"
-                py="2"
+                borderColor="transparent"
+                px="2.5"
+                py="1.5"
                 gap="2"
+                opacity="0.72"
               >
-                <Circle size="2" bg="booth.primary" />
-                <Text fontSize="sm" fontWeight="800">
+                <Circle size="1.5" bg="booth.primary" opacity="0.75" />
+                <Text color="booth.muted" fontSize="xs" fontWeight="700">
                   {label}
                 </Text>
               </HStack>
@@ -1164,17 +1163,148 @@ function ControlGroup({
 }
 
 function GeneratingScreen() {
+  const steps = ["Frame", "GIF", "QR", "Share"];
+
   return (
     <PageShell>
       <Flex minH="70dvh" align="center" justify="center">
-        <Stack align="center" gap="5" textAlign="center">
-          <Circle size="24" bg="booth.secondary">
-            <Icon as={LuSparkles} boxSize="10" />
-          </Circle>
-          <Heading>Building your booth moment</Heading>
-          <Text color="booth.muted">
-            Composing the frame and preparing the QR code.
-          </Text>
+        <Stack
+          bg="booth.surface"
+          rounded="booth"
+          borderWidth="1px"
+          borderColor="booth.border"
+          shadow="booth"
+          p={{ base: "6", md: "8" }}
+          gap="7"
+          w="min(100%, 560px)"
+          textAlign="center"
+          position="relative"
+          overflow="hidden"
+        >
+          <Box
+            position="absolute"
+            insetX="12"
+            top="7"
+            h="2"
+            rounded="full"
+            bg="booth.surfaceTint"
+            overflow="hidden"
+          >
+            <Box
+              h="full"
+              rounded="full"
+              bg="booth.primary"
+              animation="booth-fill 2.6s ease-in-out infinite"
+            />
+          </Box>
+
+          <Box position="relative" mx="auto" mt="7" w="180px" h="150px">
+            <Box
+              position="absolute"
+              inset="4"
+              bg="booth.secondary"
+              rounded="booth"
+              transform="rotate(-4deg)"
+              animation="booth-drift 2.8s ease-in-out infinite"
+            />
+            <Box
+              position="absolute"
+              inset="0"
+              bg="booth.surfaceTint"
+              rounded="booth"
+              borderWidth="2px"
+              borderColor="booth.fg"
+              overflow="hidden"
+              shadow="button"
+            >
+              <Box
+                position="absolute"
+                insetX="5"
+                top="5"
+                h="78px"
+                rounded="control"
+                bg="white"
+              />
+              <Box
+                position="absolute"
+                insetY="0"
+                w="44%"
+                bg="rgba(255,255,255,0.55)"
+                animation="booth-scan 1.35s ease-in-out infinite"
+              />
+              <HStack
+                position="absolute"
+                left="5"
+                right="5"
+                bottom="4"
+                justify="space-between"
+              >
+                {[0, 1, 2].map((index) => (
+                  <Box
+                    key={index}
+                    h="3"
+                    flex="1"
+                    rounded="full"
+                    bg={index === 1 ? "booth.primary" : "booth.lemon"}
+                    animation={`booth-tick 1.4s ease-in-out ${index * 0.18}s infinite`}
+                  />
+                ))}
+              </HStack>
+            </Box>
+
+            <Circle
+              position="absolute"
+              right="-3"
+              top="-3"
+              size="14"
+              bg="booth.lemon"
+              color="booth.fg"
+              animation="pulse 1.4s ease-in-out infinite"
+            >
+              <Icon as={LuSparkles} boxSize="7" />
+            </Circle>
+          </Box>
+
+          <Stack gap="2">
+            <Heading size="2xl" lineHeight="1">
+              Building your booth moment
+            </Heading>
+            <Text color="booth.muted">
+              Polishing the frame, GIF, QR code, and private link.
+            </Text>
+          </Stack>
+
+          <SimpleGrid columns={4} gap="2">
+            {steps.map((step, index) => (
+              <Stack
+                key={step}
+                gap="2"
+                align="center"
+                animation={`booth-tick 1.6s ease-in-out ${index * 0.2}s infinite`}
+              >
+                <Circle
+                  size="9"
+                  bg={index % 2 === 0 ? "booth.secondary" : "booth.surfaceTint"}
+                  color="booth.fg"
+                  borderWidth="1px"
+                  borderColor="booth.border"
+                >
+                  {index === 2 ? (
+                    <Icon as={LuQrCode} boxSize="4" />
+                  ) : index === 1 ? (
+                    <Text fontSize="xs" fontWeight="950">
+                      GIF
+                    </Text>
+                  ) : (
+                    <Icon as={LuSparkles} boxSize="4" />
+                  )}
+                </Circle>
+                <Text color="booth.muted" fontSize="xs" fontWeight="800">
+                  {step}
+                </Text>
+              </Stack>
+            ))}
+          </SimpleGrid>
         </Stack>
       </Flex>
     </PageShell>
@@ -1272,13 +1402,6 @@ function ShareScreen() {
               style={{ width: "100%", height: "auto" }}
             />
           </Box>
-
-          <Button asChild bg="booth.fg" color="white" rounded="full" size="lg">
-            <Link href={shareResult.shareUrl} target="_blank">
-              <LuDownload />
-              Open download page
-            </Link>
-          </Button>
 
           <Stack gap="3">
             <Field.Root invalid={Boolean(emailError)}>
