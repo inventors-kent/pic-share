@@ -50,6 +50,7 @@ import {
   useBoothStore,
 } from "@/lib/booth-store";
 import { composeFinalImage, createGifPreview } from "@/lib/canvas-compose";
+import { playShutterSound } from "@/lib/shutter-sound";
 
 const Video = chakra("video");
 const photoSlotKeys = Array.from(
@@ -317,6 +318,7 @@ function CameraScreen() {
       }
 
       const photo = capturePhoto();
+      void playShutterSound();
       if (photo) {
         if (retakeIndex === null) {
           addPhoto(photo);
