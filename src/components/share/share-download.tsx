@@ -14,7 +14,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { LuDownload, LuMail } from "react-icons/lu";
 
 type ShareDownloadProps = {
@@ -50,6 +50,14 @@ export function ShareDownload({
   const previewAssetUrl = gifAssetUrl ?? finalAssetUrl;
   const primaryDownloadUrl = gifAssetUrl ?? finalAssetUrl;
   const primaryDownloadLabel = gifAssetUrl ? "Download GIF" : "Download final";
+  const formattedExpiry = useMemo(
+    () =>
+      new Intl.DateTimeFormat(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(expiresAt)),
+    [expiresAt],
+  );
 
   return (
     <Box bg="booth.bg" minH="100dvh">
@@ -76,6 +84,8 @@ export function ShareDownload({
             <Image
               src={previewAssetUrl}
               alt="Final PicShare Booth output"
+              htmlWidth="1400"
+              htmlHeight="1400"
               rounded="control"
               w="100%"
               maxH="70dvh"
@@ -150,9 +160,13 @@ export function ShareDownload({
               <Input
                 type="email"
                 value={email}
+                name="email"
+                autoComplete="email"
+                inputMode="email"
+                spellCheck={false}
                 onChange={(event) => setEmail(event.target.value)}
                 rounded="full"
-                placeholder="guest@example.com"
+                placeholder="guest@example.com…"
               />
             </Field.Root>
             <Button
@@ -162,16 +176,22 @@ export function ShareDownload({
               disabled={!email}
             >
               <LuMail />
-              {status === "sending" ? "Sending" : "Send link"}
+              {status === "sending" ? "Sending…" : "Send link"}
             </Button>
-            {status === "sent" && <Text color="green.700">Email sent.</Text>}
+            {status === "sent" && (
+              <Text color="green.700" aria-live="polite">
+                Email sent.
+              </Text>
+            )}
             {status === "failed" && (
-              <Text color="red.700">That email could not be sent.</Text>
+              <Text color="red.700" aria-live="polite">
+                Check the address and try sending the link again.
+              </Text>
             )}
           </Stack>
 
           <Text color="booth.muted" textAlign="center" fontSize="sm">
-            This private link expires {new Date(expiresAt).toLocaleString()}.
+            This private link expires {formattedExpiry}.
           </Text>
         </Stack>
       </Container>

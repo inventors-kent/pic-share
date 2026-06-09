@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Onest } from "next/font/google";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider";
@@ -12,6 +12,10 @@ const onest = Onest({
 export const metadata: Metadata = {
   title: "PicShare Booth",
   description: "A playful event photo booth for quick QR and email sharing.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#fff8ed",
 };
 
 export default function RootLayout({

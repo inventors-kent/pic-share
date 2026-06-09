@@ -47,9 +47,9 @@ const config = defineConfig({
         "50%": { transform: "translateY(-12px) rotate(2deg)" },
       },
       "booth-fill": {
-        "0%": { width: "14%" },
-        "45%": { width: "64%" },
-        "100%": { width: "100%" },
+        "0%": { transform: "scaleX(0.14)" },
+        "45%": { transform: "scaleX(0.64)" },
+        "100%": { transform: "scaleX(1)" },
       },
       "booth-scan": {
         "0%": { transform: "translateX(-120%)" },

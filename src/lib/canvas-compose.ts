@@ -293,12 +293,8 @@ function drawStickerPreset(
   customization: BoothCustomization,
   width: number,
   height: number,
-  layout: BoothLayout,
 ) {
   const accent = accentMap.get(customization.accentColor) ?? "#ff6b5f";
-  const footerHeight = getFooterHeight(layout, customization.frame);
-  const footerTop = height - footerHeight;
-  const footerStickerY = footerTop + (layout === "grid" ? 26 : 30);
   context.save();
   context.fillStyle = accent;
   context.strokeStyle = "#182026";
@@ -320,41 +316,6 @@ function drawStickerPreset(
     context.font = "96px sans-serif";
     context.fillText("✦", 58, 132);
     context.fillText("✧", width - 142, height - 76);
-  }
-
-  if (customization.stickerPreset === "good-vibes") {
-    const badgeWidth = layout === "horizontal-strip" ? 300 : 330;
-    const badgeX = width - badgeWidth - 78;
-    const badgeY = layout === "grid" ? height - 138 : footerStickerY;
-    context.beginPath();
-    context.roundRect(badgeX, badgeY, badgeWidth, 82, 42);
-    context.fill();
-    context.stroke();
-    context.fillStyle = "#182026";
-    context.font = "700 40px sans-serif";
-    context.textAlign = "center";
-    context.fillText("good vibes", badgeX + badgeWidth / 2, badgeY + 55);
-  }
-
-  if (customization.stickerPreset === "event-badge") {
-    const badgeWidth = layout === "horizontal-strip" ? 390 : 430;
-    const badgeY = layout === "grid" ? height - 140 : footerStickerY;
-    context.beginPath();
-    context.roundRect(54, badgeY, badgeWidth, 86, 42);
-    context.fill();
-    context.stroke();
-    context.fillStyle = "#182026";
-    context.textAlign = "center";
-    drawFitText(
-      context,
-      boothConfig.eventName,
-      54 + badgeWidth / 2,
-      badgeY + 56,
-      badgeWidth - 56,
-      34,
-      22,
-      700,
-    );
   }
 
   context.restore();
@@ -395,36 +356,6 @@ function drawGifStickerPreset(
       "✧",
       photoBox.x + photoBox.width - 78,
       photoBox.y + photoBox.height - 24,
-    );
-  }
-
-  if (
-    customization.stickerPreset === "good-vibes" ||
-    customization.stickerPreset === "event-badge"
-  ) {
-    const label =
-      customization.stickerPreset === "good-vibes"
-        ? "good vibes"
-        : boothConfig.eventName;
-    const badgeWidth = 172;
-    const badgeHeight = 34;
-    const badgeX = photoBox.x + 22;
-    const badgeY = photoBox.y + photoBox.height - badgeHeight - 20;
-
-    context.beginPath();
-    context.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 18);
-    context.fill();
-    context.fillStyle = "#182026";
-    context.textAlign = "center";
-    drawFitText(
-      context,
-      label,
-      badgeX + badgeWidth / 2,
-      badgeY + 23,
-      badgeWidth - 22,
-      18,
-      13,
-      800,
     );
   }
 
@@ -477,7 +408,7 @@ export async function composeFinalImage(
   context.textAlign = "center";
   drawFitText(context, caption, width / 2, height - 82, width - 160, 44, 28);
 
-  drawStickerPreset(context, customization, width, height, layout);
+  drawStickerPreset(context, customization, width, height);
 
   return {
     dataUrl: canvas.toDataURL("image/jpeg", 0.92),

@@ -11,8 +11,6 @@ export const boothConfig = {
     { id: "sparkles", label: "Sparkles" },
     { id: "stars", label: "Party stars" },
     { id: "hearts", label: "Tiny hearts" },
-    { id: "good-vibes", label: "Good vibes" },
-    { id: "event-badge", label: "Event badge" },
   ],
   accentColors: [
     { id: "coral", label: "Coral", value: "#ff6b5f" },

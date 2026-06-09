@@ -16,6 +16,7 @@ import {
   IconButton,
   Image,
   Input,
+  Link,
   SimpleGrid,
   Stack,
   Text,
@@ -75,15 +76,41 @@ export function BoothApp() {
   }
 
   return (
-    <Box bg="booth.bg" minH="100dvh" overflowX="hidden">
-      {step === "start" && <StartScreen />}
-      {step === "camera" && <CameraScreen />}
-      {step === "review" && <ReviewScreen />}
-      {step === "customize" && <CustomizeScreen />}
-      {step === "generating" && <GeneratingScreen />}
-      {step === "share" && <ShareScreen />}
-      {step === "error" && <ErrorScreen />}
-    </Box>
+    <>
+      <Link
+        href="#main-content"
+        position="fixed"
+        top="4"
+        left="4"
+        zIndex="skipNav"
+        bg="booth.fg"
+        color="white"
+        px="4"
+        py="2"
+        rounded="full"
+        fontWeight="900"
+        transform="translateY(-160%)"
+        _focusVisible={{ transform: "translateY(0)" }}
+      >
+        Skip to main content
+      </Link>
+      <Box
+        as="main"
+        id="main-content"
+        tabIndex={-1}
+        bg="booth.bg"
+        minH="100dvh"
+        overflowX="hidden"
+      >
+        {step === "start" && <StartScreen />}
+        {step === "camera" && <CameraScreen />}
+        {step === "review" && <ReviewScreen />}
+        {step === "customize" && <CustomizeScreen />}
+        {step === "generating" && <GeneratingScreen />}
+        {step === "share" && <ShareScreen />}
+        {step === "error" && <ErrorScreen />}
+      </Box>
+    </>
   );
 }
 
@@ -113,7 +140,7 @@ function StartScreen() {
         <Stack gap="8">
           <HStack gap="3">
             <Circle bg="booth.primary" color="white" size="12">
-              <Icon as={LuCamera} boxSize="6" />
+              <Icon as={LuCamera} boxSize="6" aria-hidden="true" />
             </Circle>
             <Stack gap="0">
               <Text fontWeight="800" fontSize="lg">
@@ -526,7 +553,7 @@ function CameraScreen() {
             onClick={runBurst}
           >
             <LuCamera />
-            {status === "loading" ? "Opening camera" : "Start countdown"}
+            {status === "loading" ? "Opening camera…" : "Start countdown"}
           </Button>
         </Stack>
       </Grid>
@@ -575,6 +602,8 @@ function ReviewScreen() {
               <Image
                 src={photo.dataUrl}
                 alt={`Captured photo ${index + 1}`}
+                htmlWidth="960"
+                htmlHeight="1200"
                 rounded="control"
                 aspectRatio="4 / 5"
                 objectFit="cover"
@@ -589,7 +618,7 @@ function ReviewScreen() {
                   setStep("camera");
                 }}
               >
-                <LuRefreshCcw />
+                <LuRefreshCcw aria-hidden="true" />
                 Retake
               </Button>
             </Box>
@@ -762,8 +791,9 @@ function CustomizeScreen() {
                 rounded="full"
                 px="3"
                 py="1"
+                aria-live="polite"
               >
-                {previewStatus === "loading" ? "Updating" : "Ready"}
+                {previewStatus === "loading" ? "Updating…" : "Ready"}
               </Badge>
             </HStack>
 
@@ -788,6 +818,8 @@ function CustomizeScreen() {
                   <Image
                     src={previewDataUrl}
                     alt="Live styled booth preview"
+                    htmlWidth="1400"
+                    htmlHeight="1400"
                     rounded="control"
                     maxH={{ base: "520px", lg: "calc(100dvh - 180px)" }}
                     maxW="100%"
@@ -806,6 +838,8 @@ function CustomizeScreen() {
                       key={photo.id}
                       src={photo.dataUrl}
                       alt={`Preview photo ${index + 1}`}
+                      htmlWidth="960"
+                      htmlHeight="960"
                       rounded="control"
                       aspectRatio={
                         customization.layout === "horizontal-strip"
@@ -916,7 +950,8 @@ function CustomizeScreen() {
             <Field.Label>Caption</Field.Label>
             <Textarea
               value={customization.caption}
-              placeholder={`${boothConfig.eventName} forever`}
+              name="caption"
+              placeholder={`${boothConfig.eventName} forever…`}
               onChange={(event) =>
                 updateCustomization({ caption: event.target.value })
               }
@@ -996,15 +1031,14 @@ function AnimatedGifPreview({
           key={photo.id}
           src={photo.dataUrl}
           alt="Animated GIF frame preview"
+          htmlWidth="640"
+          htmlHeight="640"
           aspectRatio="1"
           objectFit="cover"
           w="100%"
         />
         {customization.frame === "confetti" && <ConfettiOverlay />}
-        <StickerOverlay
-          preset={customization.stickerPreset}
-          eventName={boothConfig.eventName}
-        />
+        <StickerOverlay preset={customization.stickerPreset} />
       </Box>
 
       <HStack justify="space-between" gap="3">
@@ -1068,49 +1102,7 @@ function ConfettiOverlay() {
   );
 }
 
-function StickerOverlay({
-  preset,
-  eventName,
-}: {
-  preset: StickerPresetId;
-  eventName: string;
-}) {
-  if (preset === "good-vibes") {
-    return (
-      <Badge
-        position="absolute"
-        right="4"
-        bottom="4"
-        bg="booth.lemon"
-        color="booth.fg"
-        rounded="full"
-        px="3"
-        py="1"
-        fontWeight="900"
-      >
-        good vibes
-      </Badge>
-    );
-  }
-
-  if (preset === "event-badge") {
-    return (
-      <Badge
-        position="absolute"
-        left="4"
-        bottom="4"
-        bg="booth.secondary"
-        color="booth.fg"
-        rounded="full"
-        px="3"
-        py="1"
-        fontWeight="900"
-      >
-        {eventName}
-      </Badge>
-    );
-  }
-
+function StickerOverlay({ preset }: { preset: StickerPresetId }) {
   const symbol = {
     hearts: "♥",
     sparkles: "✦",
@@ -1195,6 +1187,8 @@ function GeneratingScreen() {
               rounded="full"
               bg="booth.primary"
               animation="booth-fill 2.6s ease-in-out infinite"
+              transformOrigin="left center"
+              _motionReduce={{ animation: "none", transform: "scaleX(1)" }}
             />
           </Box>
 
@@ -1206,6 +1200,7 @@ function GeneratingScreen() {
               rounded="booth"
               transform="rotate(-4deg)"
               animation="booth-drift 2.8s ease-in-out infinite"
+              _motionReduce={{ animation: "none" }}
             />
             <Box
               position="absolute"
@@ -1231,6 +1226,7 @@ function GeneratingScreen() {
                 w="44%"
                 bg="rgba(255,255,255,0.55)"
                 animation="booth-scan 1.35s ease-in-out infinite"
+                _motionReduce={{ animation: "none", opacity: "0" }}
               />
               <HStack
                 position="absolute"
@@ -1247,6 +1243,7 @@ function GeneratingScreen() {
                     rounded="full"
                     bg={index === 1 ? "booth.primary" : "booth.lemon"}
                     animation={`booth-tick 1.4s ease-in-out ${index * 0.18}s infinite`}
+                    _motionReduce={{ animation: "none", opacity: "1" }}
                   />
                 ))}
               </HStack>
@@ -1260,8 +1257,9 @@ function GeneratingScreen() {
               bg="booth.lemon"
               color="booth.fg"
               animation="pulse 1.4s ease-in-out infinite"
+              _motionReduce={{ animation: "none" }}
             >
-              <Icon as={LuSparkles} boxSize="7" />
+              <Icon as={LuSparkles} boxSize="7" aria-hidden="true" />
             </Circle>
           </Box>
 
@@ -1281,6 +1279,7 @@ function GeneratingScreen() {
                 gap="2"
                 align="center"
                 animation={`booth-tick 1.6s ease-in-out ${index * 0.2}s infinite`}
+                _motionReduce={{ animation: "none", opacity: "1" }}
               >
                 <Circle
                   size="9"
@@ -1290,13 +1289,13 @@ function GeneratingScreen() {
                   borderColor="booth.border"
                 >
                   {index === 2 ? (
-                    <Icon as={LuQrCode} boxSize="4" />
+                    <Icon as={LuQrCode} boxSize="4" aria-hidden="true" />
                   ) : index === 1 ? (
                     <Text fontSize="xs" fontWeight="950">
                       GIF
                     </Text>
                   ) : (
-                    <Icon as={LuSparkles} boxSize="4" />
+                    <Icon as={LuSparkles} boxSize="4" aria-hidden="true" />
                   )}
                 </Circle>
                 <Text color="booth.muted" fontSize="xs" fontWeight="800">
@@ -1368,6 +1367,8 @@ function ShareScreen() {
           <Image
             src={previewAssetUrl}
             alt="Final booth output"
+            htmlWidth="1400"
+            htmlHeight="1400"
             rounded="control"
             w="100%"
             maxH="78dvh"
@@ -1409,11 +1410,19 @@ function ShareScreen() {
               <Input
                 type="email"
                 value={email}
+                name="email"
+                autoComplete="email"
+                inputMode="email"
+                spellCheck={false}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="guest@example.com"
+                placeholder="guest@example.com…"
                 rounded="full"
               />
-              {emailError && <Field.ErrorText>{emailError}</Field.ErrorText>}
+              {emailError && (
+                <Field.ErrorText aria-live="polite">
+                  {emailError}
+                </Field.ErrorText>
+              )}
             </Field.Root>
             <Button
               rounded="full"
@@ -1422,10 +1431,12 @@ function ShareScreen() {
               disabled={!email}
             >
               <LuMail />
-              {shareResult.emailStatus === "sending" ? "Sending" : "Send email"}
+              {shareResult.emailStatus === "sending"
+                ? "Sending…"
+                : "Send email"}
             </Button>
             {shareResult.emailStatus === "sent" && (
-              <Text color="green.700" fontWeight="800">
+              <Text color="green.700" fontWeight="800" aria-live="polite">
                 Email sent.
               </Text>
             )}
