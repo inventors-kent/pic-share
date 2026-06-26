@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Onest } from "next/font/google";
 import "./globals.css";
+import { SiteFooter } from "@/components/site-footer";
 import { Provider } from "@/components/ui/provider";
 
 const onest = Onest({
@@ -26,7 +27,10 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning lang="en" className={onest.variable}>
       <body>
-        <Provider>{children}</Provider>
+        <Provider>
+          {children}
+          <SiteFooter />
+        </Provider>
       </body>
     </html>
   );

@@ -8,7 +8,6 @@ let audioContext: AudioContext | null = null;
 let shutterBuffer: AudioBuffer | null = null;
 let shutterLoadPromise: Promise<AudioBuffer | null> | null = null;
 const activeSources = new Set<AudioBufferSourceNode>();
-const shutterDurationSeconds = 0.38;
 
 function getAudioContext() {
   if (audioContext) return audioContext;
@@ -80,9 +79,11 @@ export async function playShutterSound() {
 
   const source = context.createBufferSource();
   const gain = context.createGain();
-  const duration = Math.min(shutterDurationSeconds, buffer.duration);
+  const duration = buffer.duration;
+  const fadeStart = Math.max(0, duration - 0.03);
   source.buffer = buffer;
   gain.gain.setValueAtTime(0.92, context.currentTime);
+  gain.gain.setValueAtTime(0.92, context.currentTime + fadeStart);
   gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + duration);
   source.connect(gain);
   gain.connect(context.destination);
