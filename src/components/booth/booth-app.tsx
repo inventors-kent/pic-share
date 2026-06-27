@@ -21,7 +21,6 @@ import {
   Switch,
   Text,
   Textarea,
-  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -34,6 +33,7 @@ import {
   LuSparkles,
 } from "react-icons/lu";
 import QRCode from "react-qr-code";
+import { EventBackdrop } from "@/components/booth/event-backdrop";
 import {
   type AccentColorId,
   type BoothLayout,
@@ -130,145 +130,161 @@ function StartScreen() {
   const setStep = useBoothStore((state) => state.setStep);
 
   return (
-    <PageShell>
-      <Grid
-        minH={{ base: "auto", md: "calc(100dvh - 64px)" }}
-        alignItems="center"
-        gap={{ base: "8", lg: "12" }}
-        templateColumns={{ base: "1fr", lg: "0.95fr 1.05fr" }}
+    <Box>
+      <Box
+        position="relative"
+        minH={{ base: "800px", md: "88svh" }}
+        overflow="hidden"
+        color="white"
+        bg="booth.fg"
       >
-        <Stack gap="8">
-          <HStack gap="3">
-            <Circle bg="booth.primary" color="white" size="12">
-              <Icon as={LuCamera} boxSize="6" aria-hidden="true" />
-            </Circle>
-            <Stack gap="0">
-              <Text fontWeight="800" fontSize="lg">
-                {boothConfig.productName}
-              </Text>
-              <Text color="booth.muted" fontSize="sm">
-                {boothConfig.eventName}
-              </Text>
-            </Stack>
+        <EventBackdrop />
+        <Box
+          position="absolute"
+          inset="0"
+          bg={{ base: "rgba(20, 20, 20, 0.58)", md: "rgba(20, 20, 20, 0.42)" }}
+        />
+
+        <Container
+          position="relative"
+          zIndex="1"
+          maxW="7xl"
+          minH={{ base: "800px", md: "88svh" }}
+          px={{ base: "4", md: "8" }}
+          py={{ base: "6", md: "8" }}
+          display="flex"
+          flexDirection="column"
+          justifyContent="space-between"
+          gap="12"
+        >
+          <HStack justify="space-between" align="start" gap="4">
+            <HStack gap="3">
+              <Circle bg="booth.yellow" color="booth.fg" size="12">
+                <Icon as={LuCamera} boxSize="6" aria-hidden="true" />
+              </Circle>
+              <Stack gap="0">
+                <Text fontWeight="900" fontSize="lg">
+                  {boothConfig.productName}
+                </Text>
+                <Text color="rgba(255,255,255,0.78)" fontSize="sm">
+                  {boothConfig.eventName}
+                </Text>
+              </Stack>
+            </HStack>
+            <Badge
+              display={{ base: "none", sm: "inline-flex" }}
+              bg="booth.yellow"
+              color="booth.fg"
+              rounded="full"
+              px="3"
+              py="1"
+              fontWeight="900"
+            >
+              Camera ready
+            </Badge>
           </HStack>
 
-          <Stack gap="5">
-            <Heading
-              as="h1"
-              color="booth.fg"
-              fontSize={{ base: "5xl", md: "7xl" }}
-              lineHeight="0.92"
-              letterSpacing="0"
-              maxW="11ch"
-            >
-              Step in. Pose big. Take the moment home.
-            </Heading>
-            <Text
-              color="booth.muted"
-              fontSize={{ base: "lg", md: "xl" }}
+          <Stack gap="7" maxW="42rem" pb={{ base: "3", md: "6" }}>
+            <Stack gap="4">
+              <Badge
+                alignSelf="start"
+                bg="booth.primary"
+                color="white"
+                rounded="full"
+                px="3"
+                py="1"
+                fontWeight="900"
+              >
+                Your turn
+              </Badge>
+              <Heading
+                as="h1"
+                color="white"
+                fontSize={{ base: "5xl", md: "7xl" }}
+                lineHeight="0.92"
+                letterSpacing="0"
+                textShadow="0 3px 24px rgba(0, 0, 0, 0.42)"
+              >
+                KSF Fashion Show photo booth.
+              </Heading>
+              <Text
+                color="rgba(255,255,255,0.9)"
+                fontSize={{ base: "lg", md: "xl" }}
+                maxW="34rem"
+                textShadow="0 2px 14px rgba(0, 0, 0, 0.5)"
+              >
+                Bring the look. Bring your people. We’ll catch the moment.
+              </Text>
+            </Stack>
+
+            <Flex
+              direction={{ base: "column", sm: "row" }}
+              gap="3"
               maxW="36rem"
             >
-              A quick 4-shot booth session with playful frames, instant QR
-              downloads, and an optional email backup.
-            </Text>
-          </Stack>
+              <Button
+                bg="booth.primary"
+                color="white"
+                size="2xl"
+                minH="68px"
+                px="8"
+                shadow="button"
+                rounded="full"
+                fontWeight="900"
+                onClick={() => setStep("camera")}
+                _hover={{ bg: "booth.primary", transform: "translateY(-2px)" }}
+              >
+                <LuSparkles aria-hidden="true" />
+                Start booth
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                rounded="full"
+                size="xl"
+                minH="68px"
+                borderColor="rgba(255,255,255,0.72)"
+                color="white"
+                bg="rgba(0,0,0,0.18)"
+                _hover={{ bg: "rgba(0,0,0,0.34)" }}
+              >
+                <Link href="/gallery">
+                  <LuImages aria-hidden="true" />
+                  Event gallery
+                </Link>
+              </Button>
+            </Flex>
 
-          <Stack gap="4" maxW="34rem">
-            <Button
-              bg="booth.primary"
-              color="white"
-              size="2xl"
-              minH="72px"
-              shadow="button"
-              rounded="full"
-              fontWeight="900"
-              onClick={() => setStep("camera")}
-            >
-              <LuSparkles />
-              Start booth
-            </Button>
-            <Button asChild variant="outline" rounded="full" size="lg">
-              <Link href="/gallery">
-                <LuImages aria-hidden="true" />
-                View event gallery
-              </Link>
-            </Button>
-            <Text color="booth.muted" fontSize="sm">
+            <Text color="rgba(255,255,255,0.72)" fontSize="xs" maxW="36rem">
               Photos generate a private download link and can appear in the
               event gallery. Guests can opt out before sharing. Links expire
               after 24 hours.
             </Text>
           </Stack>
-        </Stack>
+        </Container>
+      </Box>
 
-        <Box
-          bg="booth.surface"
-          rounded="booth"
-          shadow="booth"
-          borderWidth="1px"
-          borderColor="booth.border"
-          p={{ base: "4", md: "6" }}
+      <Box bg="booth.yellow" color="booth.fg" overflow="hidden">
+        <HStack
+          justify="space-around"
+          gap="8"
+          px="6"
+          py="5"
+          whiteSpace="nowrap"
+          fontWeight="950"
+          fontSize={{ base: "lg", md: "2xl" }}
+          aria-hidden="true"
         >
-          <Box
-            bg="booth.ink"
-            rounded="booth"
-            minH={{ base: "360px", md: "620px" }}
-            position="relative"
-            overflow="hidden"
-          >
-            <SimpleGrid columns={2} gap="4" p="5" opacity="0.95">
-              {["#EE5B54", "#009688", "#FFDE39", "#18364A"].map(
-                (color, index) => (
-                  <Box
-                    key={color}
-                    bg={color}
-                    rounded="control"
-                    aspectRatio="1"
-                    borderWidth="8px"
-                    borderColor="white"
-                    transform={index % 2 ? "translateY(28px)" : "none"}
-                  />
-                ),
-              )}
-            </SimpleGrid>
-            <VStack
-              position="absolute"
-              insetX="6"
-              bottom="6"
-              bg="rgba(255, 255, 255, 0.94)"
-              rounded="control"
-              p="5"
-              align="stretch"
-              gap="4"
-            >
-              <HStack justify="space-between">
-                <Badge
-                  bg="booth.secondary"
-                  color="booth.fg"
-                  px="3"
-                  py="1"
-                  rounded="full"
-                >
-                  4-shot burst
-                </Badge>
-                <HStack gap="2">
-                  {photoSlotKeys.map((slotKey, index) => (
-                    <Circle
-                      key={slotKey}
-                      size="3"
-                      bg={index === 0 ? "booth.primary" : "booth.border"}
-                    />
-                  ))}
-                </HStack>
-              </HStack>
-              <Text fontWeight="800" fontSize={{ base: "lg", md: "2xl" }}>
-                Ready for the next guest
-              </Text>
-            </VStack>
-          </Box>
-        </Box>
-      </Grid>
-    </PageShell>
+          <Text>MAKE</Text>
+          <Text>•</Text>
+          <Text>POSE</Text>
+          <Text>•</Text>
+          <Text>CELEBRATE</Text>
+          <Text display={{ base: "none", md: "block" }}>•</Text>
+          <Text display={{ base: "none", md: "block" }}>REPEAT</Text>
+        </HStack>
+      </Box>
+    </Box>
   );
 }
 

@@ -67,6 +67,10 @@ const config = defineConfig({
         "0%, 100%": { opacity: "0.45", transform: "scale(0.8)" },
         "50%": { opacity: "1", transform: "scale(1)" },
       },
+      "event-film": {
+        "0%, 100%": { transform: "scale(1.01)" },
+        "50%": { transform: "scale(1.045)" },
+      },
     },
   },
   globalCss: {
