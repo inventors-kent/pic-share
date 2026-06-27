@@ -1404,7 +1404,7 @@ function ShareScreen() {
             />
           </Box>
 
-          <Stack gap="3">
+          {/* <Stack gap="3">
             <Field.Root invalid={Boolean(emailError)}>
               <Field.Label>Email backup link</Field.Label>
               <Input
@@ -1440,7 +1440,7 @@ function ShareScreen() {
                 Email sent.
               </Text>
             )}
-          </Stack>
+          </Stack> */}
 
           <Button
             size="xl"
