@@ -13,11 +13,11 @@ export const boothConfig = {
     { id: "hearts", label: "Tiny hearts" },
   ],
   accentColors: [
-    { id: "coral", label: "Coral", value: "#ff6b5f" },
-    { id: "mint", label: "Mint", value: "#8ee6c8" },
-    { id: "lemon", label: "Lemon", value: "#ffd66b" },
-    { id: "lilac", label: "Lilac", value: "#b9a8ff" },
-    { id: "sky", label: "Sky", value: "#8fd4ff" },
+    { id: "coral", label: "Coral", value: "#EE5B54" },
+    { id: "teal", label: "Teal", value: "#009688" },
+    { id: "yellow", label: "Yellow", value: "#FFDE39" },
+    { id: "navy", label: "Navy", value: "#18364A" },
+    { id: "sky", label: "Sky", value: "#03A9F4" },
   ],
 } as const;
 

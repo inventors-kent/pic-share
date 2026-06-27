@@ -28,13 +28,13 @@ function createDevMockSession(token: string) {
     "data:image/svg+xml;utf8," +
     encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
-        <rect width="1200" height="1200" fill="#fff8ed"/>
-        <rect x="90" y="90" width="1020" height="1020" rx="70" fill="#ff6b5f"/>
-        <rect x="150" y="150" width="420" height="420" rx="40" fill="#8ee6c8"/>
-        <rect x="630" y="150" width="420" height="420" rx="40" fill="#ffd66b"/>
-        <rect x="150" y="630" width="420" height="420" rx="40" fill="#b9a8ff"/>
-        <rect x="630" y="630" width="420" height="420" rx="40" fill="#8fd4ff"/>
-        <text x="600" y="1120" text-anchor="middle" font-family="Arial" font-size="48" font-weight="700" fill="#182026">PicShare Booth</text>
+        <rect width="1200" height="1200" fill="#FFFAFA"/>
+        <rect x="90" y="90" width="1020" height="1020" rx="70" fill="#EE5B54"/>
+        <rect x="150" y="150" width="420" height="420" rx="40" fill="#009688"/>
+        <rect x="630" y="150" width="420" height="420" rx="40" fill="#FFDE39"/>
+        <rect x="150" y="630" width="420" height="420" rx="40" fill="#18364A"/>
+        <rect x="630" y="630" width="420" height="420" rx="40" fill="#03A9F4"/>
+        <text x="600" y="1120" text-anchor="middle" font-family="Arial" font-size="48" font-weight="700" fill="#313131">PicShare Booth</text>
       </svg>
     `);
 

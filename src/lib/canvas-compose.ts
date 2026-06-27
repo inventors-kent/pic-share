@@ -25,7 +25,7 @@ const gifDelayMs = {
   fast: 280,
 };
 
-const confettiColors = ["#ff6b5f", "#8ee6c8", "#ffd66b", "#b9a8ff", "#8fd4ff"];
+const confettiColors = ["#EE5B54", "#009688", "#FFDE39", "#18364A", "#03A9F4"];
 
 function getFooterHeight(
   layout: BoothLayout,
@@ -250,7 +250,7 @@ function drawPhotoSlot(
     context.shadowColor = "rgba(24, 32, 38, 0.14)";
     context.shadowBlur = 22;
     context.shadowOffsetY = 12;
-    context.fillStyle = "#fffaf1";
+    context.fillStyle = "#FFFAFA";
     roundedRect(context, slot.x, slot.y, slot.width, slot.height, 30);
     context.fill();
     context.restore();
@@ -294,10 +294,10 @@ function drawStickerPreset(
   width: number,
   height: number,
 ) {
-  const accent = accentMap.get(customization.accentColor) ?? "#ff6b5f";
+  const accent = accentMap.get(customization.accentColor) ?? "#EE5B54";
   context.save();
   context.fillStyle = accent;
-  context.strokeStyle = "#182026";
+  context.strokeStyle = "#313131";
   context.lineWidth = 8;
 
   if (customization.stickerPreset === "hearts") {
@@ -326,11 +326,11 @@ function drawGifStickerPreset(
   customization: BoothCustomization,
   photoBox: { x: number; y: number; width: number; height: number },
 ) {
-  const accent = accentMap.get(customization.accentColor) ?? "#ff6b5f";
+  const accent = accentMap.get(customization.accentColor) ?? "#EE5B54";
 
   context.save();
   context.fillStyle = accent;
-  context.strokeStyle = "#182026";
+  context.strokeStyle = "#313131";
   context.lineWidth = 5;
 
   if (customization.stickerPreset === "hearts") {
@@ -378,12 +378,12 @@ export async function composeFinalImage(
   canvas.width = width;
   canvas.height = height;
 
-  const accent = accentMap.get(customization.accentColor) ?? "#ff6b5f";
+  const accent = accentMap.get(customization.accentColor) ?? "#EE5B54";
   context.fillStyle =
     customization.frame === "clean"
       ? "#ffffff"
       : customization.frame === "instant"
-        ? "#f8efe4"
+        ? "#FFFAFA"
         : accent;
   context.fillRect(0, 0, width, height);
 
@@ -404,7 +404,7 @@ export async function composeFinalImage(
 
   const caption = customization.caption.trim() || boothConfig.eventName;
 
-  context.fillStyle = "#182026";
+  context.fillStyle = "#313131";
   context.textAlign = "center";
   drawFitText(context, caption, width / 2, height - 82, width - 160, 44, 28);
 
@@ -435,7 +435,7 @@ export async function createGifPreview(
   canvas.width = width;
   canvas.height = height;
 
-  const accent = accentMap.get(customization.accentColor) ?? "#ff6b5f";
+  const accent = accentMap.get(customization.accentColor) ?? "#EE5B54";
   const gif = GIFEncoder();
   const images = await Promise.all(
     photos.map((photo) => loadImage(photo.dataUrl)),
@@ -481,7 +481,7 @@ export async function createGifPreview(
 
     drawGifStickerPreset(context, customization, photoBox);
 
-    context.fillStyle = "#182026";
+    context.fillStyle = "#313131";
     context.textAlign = "left";
     drawFitText(
       context,
@@ -505,7 +505,7 @@ export async function createGifPreview(
       18,
     );
     context.fill();
-    context.fillStyle = "#182026";
+    context.fillStyle = "#313131";
     context.textAlign = "center";
     context.font = "800 18px sans-serif";
     context.fillText(

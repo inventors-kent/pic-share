@@ -19,7 +19,7 @@ export async function sendPhotoSessionEmail(
     to: email,
     subject: "Your PicShare Booth photos are ready",
     html: `
-      <div style="font-family: system-ui, sans-serif; color: #182026;">
+      <div style="font-family: system-ui, sans-serif; color: #313131;">
         <h1>Your booth moment is ready</h1>
         <p>Open your private download page here:</p>
         <p><a href="${shareUrl}">${shareUrl}</a></p>

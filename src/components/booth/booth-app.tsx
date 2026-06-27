@@ -211,7 +211,7 @@ function StartScreen() {
             overflow="hidden"
           >
             <SimpleGrid columns={2} gap="4" p="5" opacity="0.95">
-              {["#ff6b5f", "#8ee6c8", "#ffd66b", "#b9a8ff"].map(
+              {["#EE5B54", "#009688", "#FFDE39", "#18364A"].map(
                 (color, index) => (
                   <Box
                     key={color}
@@ -505,7 +505,7 @@ function CameraScreen() {
                       rounded="full"
                       bg={isCaptured ? "booth.primary" : "booth.border"}
                       outline={isCurrent ? "3px solid" : "none"}
-                      outlineColor="booth.lemon"
+                      outlineColor="booth.yellow"
                     />
                     <Text
                       color={
@@ -784,7 +784,7 @@ function CustomizeScreen() {
               <Badge
                 bg={
                   previewStatus === "loading"
-                    ? "booth.lemon"
+                    ? "booth.yellow"
                     : "booth.secondary"
                 }
                 color="booth.fg"
@@ -1014,7 +1014,7 @@ function AnimatedGifPreview({
   const accent =
     boothConfig.accentColors.find(
       (color) => color.id === customization.accentColor,
-    )?.value ?? "#ff6b5f";
+    )?.value ?? "#EE5B54";
 
   return (
     <Stack
@@ -1059,8 +1059,8 @@ function ConfettiOverlay() {
     const color = [
       "booth.primary",
       "booth.secondary",
-      "booth.lemon",
-      "booth.lilac",
+      "booth.yellow",
+      "booth.navy",
       "booth.sky",
     ][index % 5];
     const offset = `${8 + ((index * 17) % 76)}%`;
@@ -1128,7 +1128,7 @@ function StickerOverlay({ preset }: { preset: StickerPresetId }) {
         position="absolute"
         right="4"
         bottom="3"
-        color="booth.lemon"
+        color="booth.yellow"
         fontSize="4xl"
         fontWeight="900"
         lineHeight="1"
@@ -1241,7 +1241,7 @@ function GeneratingScreen() {
                     h="3"
                     flex="1"
                     rounded="full"
-                    bg={index === 1 ? "booth.primary" : "booth.lemon"}
+                    bg={index === 1 ? "booth.primary" : "booth.yellow"}
                     animation={`booth-tick 1.4s ease-in-out ${index * 0.18}s infinite`}
                     _motionReduce={{ animation: "none", opacity: "1" }}
                   />
@@ -1254,7 +1254,7 @@ function GeneratingScreen() {
               right="-3"
               top="-3"
               size="14"
-              bg="booth.lemon"
+              bg="booth.yellow"
               color="booth.fg"
               animation="pulse 1.4s ease-in-out infinite"
               _motionReduce={{ animation: "none" }}
@@ -1476,7 +1476,7 @@ function ErrorScreen() {
           textAlign="center"
           shadow="booth"
         >
-          <Circle size="20" bg="booth.lemon" mx="auto">
+          <Circle size="20" bg="booth.yellow" mx="auto">
             <Icon as={LuCamera} boxSize="9" />
           </Circle>
           <Heading>Camera needs a quick check.</Heading>
