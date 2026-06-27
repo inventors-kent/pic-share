@@ -31,13 +31,14 @@ This app is for our own events, running mainly on our own iPads. It should be:
 - Responsive in iPad portrait and landscape.
 - Designed for large touch targets and quick guest turnover.
 - Anonymous for guests, with no account requirement.
-- Private per-session links only. No public event gallery in v1.
+- Private per-session download links.
+- A public event gallery for completed sessions that guests explicitly opt into.
 
 ## Core User Flow
 
 Use this flow:
 
-`Start / attract screen -> camera burst -> review photos -> retake individual photos if needed -> customize -> generate output -> QR/download/email share screen -> reset for next guest`
+`Start / attract screen -> camera burst -> review photos -> retake individual photos if needed -> customize and choose gallery visibility -> generate output -> QR/download/email share screen -> reset for next guest`
 
 Details:
 
@@ -111,13 +112,17 @@ Use QR-first sharing.
 - No login, no passcode.
 - Anyone with the private unguessable link can access it until expiry.
 - If email sending is in progress, still show the QR/download screen immediately.
+- Gallery visibility defaults on but is clearly disclosed and can be disabled before generation.
+- The gallery exposes only the finished media, layout, caption, and creation time. It must never expose guest emails or private session metadata.
 
 ## Routes
 
 Recommended route structure:
 
 - `/` guest booth flow
+- `/gallery` responsive live event gallery
 - `/s/[token]` mobile-friendly share/download page
+- `GET /api/gallery` fetch the latest opted-in gallery items
 - `POST /api/sessions` create session, upload media, store metadata
 - `POST /api/sessions/[token]/email` send or resend email
 - `GET /api/sessions/[token]` fetch share metadata if needed

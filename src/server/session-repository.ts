@@ -135,6 +135,27 @@ export async function getPhotoSessionByToken(
   return rows[0] ? toRecord(rows[0]) : null;
 }
 
+export async function listGalleryPhotoSessions(limit = 60) {
+  const sql = getSql();
+
+  if (!sql) {
+    return Array.from(memorySessions.values())
+      .filter((session) => session.customization.galleryVisible === true)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, limit);
+  }
+
+  const rows = await sql`
+    select *
+    from photo_sessions
+    where customization_json @> '{"galleryVisible": true}'::jsonb
+    order by created_at desc
+    limit ${limit}
+  `;
+  await sql.end();
+  return rows.map(toRecord);
+}
+
 export async function markEmailSent(token: string, email: string) {
   const sql = getSql();
   const sentAt = new Date().toISOString();

@@ -15,10 +15,10 @@ import {
   Icon,
   IconButton,
   Image,
-  Input,
   Link,
   SimpleGrid,
   Stack,
+  Switch,
   Text,
   Textarea,
   VStack,
@@ -27,7 +27,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   LuCamera,
   LuCheck,
-  LuMail,
+  LuImages,
   LuPartyPopper,
   LuQrCode,
   LuRefreshCcw,
@@ -187,10 +187,16 @@ function StartScreen() {
               <LuSparkles />
               Start booth
             </Button>
+            <Button asChild variant="outline" rounded="full" size="lg">
+              <Link href="/gallery">
+                <LuImages aria-hidden="true" />
+                View event gallery
+              </Link>
+            </Button>
             <Text color="booth.muted" fontSize="sm">
-              By continuing, guests agree that photos are used to generate and
-              deliver their private booth download link. Links expire after 24
-              hours.
+              Photos generate a private download link and can appear in the
+              event gallery. Guests can opt out before sharing. Links expire
+              after 24 hours.
             </Text>
           </Stack>
         </Stack>
@@ -977,6 +983,37 @@ function CustomizeScreen() {
             </ControlGroup>
           )}
 
+          <Switch.Root
+            checked={customization.galleryVisible}
+            onCheckedChange={(details) =>
+              updateCustomization({ galleryVisible: details.checked })
+            }
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            gap="4"
+            borderTopWidth="1px"
+            borderColor="booth.border"
+            pt="5"
+          >
+            <Switch.Label>
+              <Stack gap="0">
+                <Text fontWeight="850">Show in event gallery</Text>
+                <Text color="booth.muted" fontSize="sm">
+                  Add this finished photo or GIF to the live runway wall.
+                </Text>
+              </Stack>
+            </Switch.Label>
+            <Switch.HiddenInput />
+            <Switch.Control
+              bg="booth.border"
+              _checked={{ bg: "booth.primary" }}
+              flexShrink="0"
+            >
+              <Switch.Thumb />
+            </Switch.Control>
+          </Switch.Root>
+
           <HStack>
             <Button
               variant="outline"
@@ -1314,9 +1351,6 @@ function ShareScreen() {
   const shareResult = useBoothStore((state) => state.shareResult);
   const generatedDataUrl = useBoothStore((state) => state.generatedDataUrl);
   const reset = useBoothStore((state) => state.reset);
-  const setEmailStatus = useBoothStore((state) => state.setEmailStatus);
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState<string | null>(null);
 
   useEffect(() => {
     const timeout = window.setTimeout(reset, boothConfig.resetAfterMs);
@@ -1327,27 +1361,6 @@ function ShareScreen() {
 
   const previewAssetUrl =
     generatedDataUrl ?? shareResult.gifAssetUrl ?? shareResult.finalAssetUrl;
-
-  async function sendEmail() {
-    if (!shareResult) return;
-    setEmailError(null);
-    setEmailStatus("sending");
-    const response = await fetch(`/api/sessions/${shareResult.token}/email`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-
-    if (!response.ok) {
-      setEmailStatus("failed");
-      setEmailError(
-        "That email could not be sent. Check the address and try again.",
-      );
-      return;
-    }
-
-    setEmailStatus("sent");
-  }
 
   return (
     <PageShell>
@@ -1404,53 +1417,23 @@ function ShareScreen() {
             />
           </Box>
 
-          {/* <Stack gap="3">
-            <Field.Root invalid={Boolean(emailError)}>
-              <Field.Label>Email backup link</Field.Label>
-              <Input
-                type="email"
-                value={email}
-                name="email"
-                autoComplete="email"
-                inputMode="email"
-                spellCheck={false}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="guest@example.com…"
-                rounded="full"
-              />
-              {emailError && (
-                <Field.ErrorText aria-live="polite">
-                  {emailError}
-                </Field.ErrorText>
-              )}
-            </Field.Root>
+          <Stack gap="3">
             <Button
+              size="xl"
               rounded="full"
-              variant="outline"
-              onClick={sendEmail}
-              disabled={!email}
+              bg="booth.primary"
+              color="white"
+              onClick={reset}
             >
-              <LuMail />
-              {shareResult.emailStatus === "sending"
-                ? "Sending…"
-                : "Send email"}
+              Start new session
             </Button>
-            {shareResult.emailStatus === "sent" && (
-              <Text color="green.700" fontWeight="800" aria-live="polite">
-                Email sent.
-              </Text>
-            )}
-          </Stack> */}
-
-          <Button
-            size="xl"
-            rounded="full"
-            bg="booth.primary"
-            color="white"
-            onClick={reset}
-          >
-            Start new session
-          </Button>
+            <Button asChild variant="outline" rounded="full">
+              <Link href="/gallery">
+                <LuImages aria-hidden="true" />
+                See the event gallery
+              </Link>
+            </Button>
+          </Stack>
         </Stack>
       </Grid>
     </PageShell>

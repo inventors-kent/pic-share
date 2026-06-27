@@ -59,6 +59,14 @@ const config = defineConfig({
         "0%, 100%": { opacity: "0.55", transform: "scale(0.96)" },
         "50%": { opacity: "1", transform: "scale(1.04)" },
       },
+      "gallery-reveal": {
+        "0%": { opacity: "0" },
+        "100%": { opacity: "1" },
+      },
+      "gallery-live": {
+        "0%, 100%": { opacity: "0.45", transform: "scale(0.8)" },
+        "50%": { opacity: "1", transform: "scale(1)" },
+      },
     },
   },
   globalCss: {

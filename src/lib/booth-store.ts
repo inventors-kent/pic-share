@@ -32,6 +32,7 @@ export type BoothCustomization = {
   stickerPreset: StickerPresetId;
   caption: string;
   gifSpeed: GifSpeed;
+  galleryVisible: boolean;
 };
 
 export type ShareResult = {
@@ -70,6 +71,7 @@ const defaultCustomization: BoothCustomization = {
   stickerPreset: "sparkles",
   caption: "",
   gifSpeed: "normal",
+  galleryVisible: true,
 };
 
 export const useBoothStore = create<BoothState>((set) => ({
