@@ -1010,7 +1010,7 @@ function CustomizeScreen() {
               _checked={{ bg: "booth.primary" }}
               flexShrink="0"
             >
-              <Switch.Thumb />
+              <Switch.Thumb _checked={{ bg: "white" }} />
             </Switch.Control>
           </Switch.Root>
 
